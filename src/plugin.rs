@@ -82,8 +82,15 @@ pub(crate) struct BackendStore<C: Config> {
 /// Queue with `commands.queue(SaveConfig::<MyConfig>::default())`. Errors are
 /// logged via `warn!` and do not panic — saving config should never crash a
 /// running game.
-#[derive(Default)]
 pub struct SaveConfig<C: Config>(PhantomData<C>);
+
+// Manual `Default` impl: `#[derive(Default)]` would add a bogus `C: Default`
+// bound that `PhantomData<C>` doesn't actually need.
+impl<C: Config> Default for SaveConfig<C> {
+    fn default() -> Self {
+        Self(PhantomData)
+    }
+}
 
 impl<C: Config> Command for SaveConfig<C> {
     type Out = ();

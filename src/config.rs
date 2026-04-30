@@ -50,8 +50,16 @@ pub trait Config: Resource + Send + Sync + 'static {
 /// ```ignore
 /// app.add_observer(|_: On<ConfigApplied<MyConfig>>, /* ... */| {});
 /// ```
-#[derive(Event, Default)]
+#[derive(Event)]
 pub struct ConfigApplied<C: Config>(pub PhantomData<C>);
+
+// Manual `Default` impl: `#[derive(Default)]` would add a bogus `C: Default`
+// bound that `PhantomData<C>` doesn't actually need.
+impl<C: Config> Default for ConfigApplied<C> {
+    fn default() -> Self {
+        Self(PhantomData)
+    }
+}
 
 /// Centralized ordering for `bevy_config` systems. Drop your own systems into
 /// these sets via `.in_set(BevyConfigSet::ApplyBindings)` (or `.before(...)`)
