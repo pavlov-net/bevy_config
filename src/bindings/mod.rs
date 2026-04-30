@@ -41,5 +41,9 @@ impl Plugin for CommonBindingsPlugin {
                 .in_set(BevyConfigSet::ApplyBindings)
                 .run_if(resource_changed::<CommonConfig>),
         );
+        // `apply_display` doesn't need a sibling observer — display config is
+        // window-scoped, not camera-scoped, and the primary window already
+        // exists by the time `Res<CommonConfig>` first changes.
+        app.add_observer(render::apply_render_on_camera_add);
     }
 }

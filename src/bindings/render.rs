@@ -10,9 +10,25 @@ use bevy_log::warn;
 use bevy_render::view::Msaa;
 
 use crate::caps::AdapterCaps;
-use crate::common::{AntiAlias, CommonConfig, MsaaLevel, Upscaler};
+use crate::common::{AntiAlias, CommonConfig, MsaaLevel, Render, Upscaler};
 
 use super::BevyConfigCamera;
+
+/// Apply [`Render`] to a single camera entity. Called by both the
+/// resource-changed system below and by the `Add, BevyConfigCamera`
+/// observer in [`super::CommonBindingsPlugin`], so cameras spawned
+/// after the initial config-applied tick still pick up the current
+/// settings on their first frame.
+pub(super) fn apply_render_to_entity(
+    commands: &mut Commands,
+    entity: Entity,
+    render: &Render,
+    caps: Option<&AdapterCaps>,
+) {
+    apply_anti_alias(commands, entity, render.anti_alias);
+    apply_msaa(commands, entity, render.msaa);
+    apply_upscaler(commands, entity, render.upscaler, caps);
+}
 
 pub(super) fn apply_render(
     config: Res<CommonConfig>,
@@ -21,15 +37,22 @@ pub(super) fn apply_render(
     mut commands: Commands,
 ) {
     for entity in &cameras {
-        apply_anti_alias(&mut commands, entity, config.render.anti_alias);
-        apply_msaa(&mut commands, entity, config.render.msaa);
-        apply_upscaler(
-            &mut commands,
-            entity,
-            config.render.upscaler,
-            caps.as_deref(),
-        );
+        apply_render_to_entity(&mut commands, entity, &config.render, caps.as_deref());
     }
+}
+
+/// Observer: apply current [`Render`] settings whenever a camera is
+/// tagged with [`BevyConfigCamera`]. Fixes the deferred-spawn race
+/// where `apply_render`'s `resource_changed::<CommonConfig>` first-tick
+/// pulse fires before the consumer's `OnEnter(...)` system spawns the
+/// camera, leaving it without configured AA/MSAA/upscaler.
+pub(super) fn apply_render_on_camera_add(
+    add: On<Add, BevyConfigCamera>,
+    config: Res<CommonConfig>,
+    caps: Option<Res<AdapterCaps>>,
+    mut commands: Commands,
+) {
+    apply_render_to_entity(&mut commands, add.entity, &config.render, caps.as_deref());
 }
 
 fn apply_anti_alias(commands: &mut Commands, entity: Entity, mode: AntiAlias) {
