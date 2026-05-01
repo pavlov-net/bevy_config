@@ -27,6 +27,12 @@ jobs:
         os: [blacksmith-4vcpu-ubuntu-2404, blacksmith-6vcpu-macos-latest, blacksmith-4vcpu-windows-2025]
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Install Bevy Linux deps
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libwayland-dev libxkbcommon-dev libudev-dev libasound2-dev
       - uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8 # stable @ 2026-04
       - uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
       # `--all-features` would enable `dlss`, which pulls dlss_wgpu and the
