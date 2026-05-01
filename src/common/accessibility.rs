@@ -8,6 +8,7 @@ use crate::caps::{AdapterCaps, PlatformTarget};
 /// Colour-blind compensation mode (binding TBD — slot only in v0.1; consumers
 /// can read the value and adapt their UI shaders/palettes themselves).
 #[derive(Reflect, Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[non_exhaustive]
 pub enum ColorBlindMode {
     None,
     Protanopia,

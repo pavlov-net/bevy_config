@@ -38,6 +38,7 @@ pub struct AdapterCaps {
 
 /// Selected graphics backend.
 #[derive(Reflect, Debug, Clone, Copy, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum Backend {
     Vulkan,
     Dx12,
@@ -62,6 +63,7 @@ impl Backend {
 
 /// GPU vendor inferred from the PCI vendor id.
 #[derive(Reflect, Debug, Clone, Copy, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum GpuVendor {
     Nvidia,
     Amd,
@@ -89,6 +91,7 @@ impl GpuVendor {
 
 /// Where the application is running.
 #[derive(Reflect, Debug, Clone, Copy, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum PlatformTarget {
     Wasm,
     WindowsDesktop,

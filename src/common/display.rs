@@ -28,6 +28,7 @@ pub enum VsyncMode {
 
 /// Monitor selection. The binding maps onto [`bevy_window::MonitorSelection`].
 #[derive(Reflect, Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[non_exhaustive]
 pub enum MonitorSelection {
     Primary,
     Index(u32),

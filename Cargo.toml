@@ -2,9 +2,11 @@
 name = "bevy_config"
 version = "0.1.0"
 edition = "2024"
+rust-version = "1.85"
 license = "MIT OR Apache-2.0"
 description = "Capability-aware configuration system for Bevy: adapter detection, platform defaults, user overrides, engine bindings."
 repository = "https://github.com/pavlov-net/bevy_config"
+readme = "README.md"
 keywords = ["bevy", "config", "settings", "options", "graphics"]
 categories = ["game-development", "config"]
 

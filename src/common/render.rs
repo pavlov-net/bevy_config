@@ -8,6 +8,7 @@ use crate::caps::{AdapterCaps, PlatformTarget};
 /// Anti-aliasing technique. Mutually exclusive with the technique components
 /// — the binding inserts/removes the right one on tagged cameras.
 #[derive(Reflect, Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[non_exhaustive]
 pub enum AntiAlias {
     None,
     Fxaa,
@@ -28,6 +29,7 @@ pub enum MsaaLevel {
 /// schema slots — selecting them logs a warning and falls back to `Native` for
 /// now.
 #[derive(Reflect, Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[non_exhaustive]
 pub enum Upscaler {
     Native,
     Dlss(UpscalerPreset),
@@ -38,6 +40,7 @@ pub enum Upscaler {
 
 /// Quality preset for upscalers (DLSS / FSR / XeSS / TSR).
 #[derive(Reflect, Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[non_exhaustive]
 pub enum UpscalerPreset {
     Quality,
     Balanced,

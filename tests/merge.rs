@@ -29,7 +29,6 @@ fn integrated_intel_caps() -> AdapterCaps {
 
 #[test]
 fn platform_default_wasm_is_conservative() {
-    use bevy_config::config::Config;
     let cfg = CommonConfig::platform_default(PlatformTarget::Wasm);
     assert!(matches!(cfg.render.anti_alias, AntiAlias::None));
     assert!(matches!(cfg.render.upscaler, Upscaler::Native));
@@ -39,14 +38,12 @@ fn platform_default_wasm_is_conservative() {
 
 #[test]
 fn platform_default_desktop_uses_taa() {
-    use bevy_config::config::Config;
     let cfg = CommonConfig::platform_default(PlatformTarget::LinuxDesktop);
     assert!(matches!(cfg.render.anti_alias, AntiAlias::Taa));
 }
 
 #[test]
 fn merge_applies_sparse_overrides() {
-    use bevy_config::config::Config;
     let mut cfg = CommonConfig::platform_default(PlatformTarget::LinuxDesktop);
 
     let mut overrides = CommonConfigOverrides::default();
@@ -65,7 +62,6 @@ fn merge_applies_sparse_overrides() {
 
 #[test]
 fn clamp_strips_ray_tracing_when_caps_lack_ray_query() {
-    use bevy_config::config::Config;
     let mut cfg = CommonConfig::platform_default(PlatformTarget::LinuxDesktop);
     cfg.render.ray_tracing = true;
 
@@ -76,7 +72,6 @@ fn clamp_strips_ray_tracing_when_caps_lack_ray_query() {
 
 #[test]
 fn clamp_keeps_ray_tracing_when_caps_support_it() {
-    use bevy_config::config::Config;
     let mut cfg = CommonConfig::platform_default(PlatformTarget::LinuxDesktop);
     cfg.render.ray_tracing = true;
 
@@ -87,7 +82,6 @@ fn clamp_keeps_ray_tracing_when_caps_support_it() {
 
 #[test]
 fn clamp_falls_back_to_native_when_dlss_unavailable() {
-    use bevy_config::config::Config;
     let mut cfg = CommonConfig::platform_default(PlatformTarget::LinuxDesktop);
     cfg.render.upscaler = Upscaler::Dlss(UpscalerPreset::Quality);
 
@@ -98,7 +92,6 @@ fn clamp_falls_back_to_native_when_dlss_unavailable() {
 
 #[test]
 fn clamp_keeps_dlss_when_supported() {
-    use bevy_config::config::Config;
     let mut cfg = CommonConfig::platform_default(PlatformTarget::LinuxDesktop);
     cfg.render.upscaler = Upscaler::Dlss(UpscalerPreset::Balanced);
 
@@ -109,7 +102,6 @@ fn clamp_keeps_dlss_when_supported() {
 
 #[test]
 fn clamp_clamps_render_scale_and_sharpness() {
-    use bevy_config::config::Config;
     let mut cfg = CommonConfig::platform_default(PlatformTarget::LinuxDesktop);
     cfg.render.render_scale = 1.5; // > 1.0
     cfg.render.sharpness = -0.2; // < 0.0
@@ -122,7 +114,6 @@ fn clamp_clamps_render_scale_and_sharpness() {
 
 #[test]
 fn current_overrides_is_empty_when_unchanged() {
-    use bevy_config::config::Config;
     let cfg = CommonConfig::platform_default(PlatformTarget::LinuxDesktop);
     let overrides = cfg.current_overrides(PlatformTarget::LinuxDesktop);
     assert_eq!(overrides, CommonConfigOverrides::default());
@@ -130,7 +121,6 @@ fn current_overrides_is_empty_when_unchanged() {
 
 #[test]
 fn current_overrides_captures_only_changes() {
-    use bevy_config::config::Config;
     let mut cfg = CommonConfig::platform_default(PlatformTarget::LinuxDesktop);
     cfg.render.msaa = MsaaLevel::Sample4;
     cfg.accessibility.subtitles_on = true;
@@ -145,7 +135,6 @@ fn current_overrides_captures_only_changes() {
 
 #[test]
 fn roundtrip_merge_after_diff() {
-    use bevy_config::config::Config;
     let target = PlatformTarget::LinuxDesktop;
     let mut original = CommonConfig::platform_default(target);
     original.render.msaa = MsaaLevel::Sample8;

@@ -97,20 +97,16 @@ impl<C: Config> Command for SaveConfig<C> {
 
     fn apply(self, world: &mut World) {
         let target = PlatformTarget::detect();
-        let overrides = match world.get_resource::<C>() {
-            Some(c) => c.current_overrides(target),
-            None => {
-                warn!("SaveConfig: resource not present (was ConfigPlugin added?)");
-                return;
-            }
+        let Some(config) = world.get_resource::<C>() else {
+            warn!("SaveConfig: resource not present (was ConfigPlugin added?)");
+            return;
         };
-        let backend = match world.get_resource::<BackendStore<C>>() {
-            Some(b) => b.backend.clone(),
-            None => {
-                warn!("SaveConfig: backend store not present (was ConfigPlugin added?)");
-                return;
-            }
+        let overrides = config.current_overrides(target);
+        let Some(store) = world.get_resource::<BackendStore<C>>() else {
+            warn!("SaveConfig: backend store not present (was ConfigPlugin added?)");
+            return;
         };
+        let backend = store.backend.clone();
         if let Err(e) = backend.store(&overrides) {
             warn!("SaveConfig: store failed: {e}");
         }

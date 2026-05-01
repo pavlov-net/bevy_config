@@ -42,6 +42,7 @@ pub trait ConfigBackend<C: Config>: Send + Sync + 'static {
     fn load(&self) -> Option<C::Overrides>;
 
     /// Write `overrides` to the underlying storage.
+    #[must_use = "persisting config should not silently drop a save error"]
     fn store(&self, overrides: &C::Overrides) -> Result<(), BackendError>;
 }
 
