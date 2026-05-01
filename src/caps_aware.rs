@@ -1,10 +1,9 @@
 //! Caps-aware extension to `bevy_settings`.
 //!
 //! [`CapsAware`] is a small trait that any settings [`Resource`] can implement
-//! to declare a `clamp_to(&caps)` step. [`CapsAwarePlugin`] runs once in
-//! [`Plugin::finish`](bevy_app::Plugin::finish) — after `RenderApp` is
-//! populated and after `bevy_settings::PreferencesPlugin` has loaded its
-//! files — and:
+//! to declare a `clamp_to(caps)` step. [`CapsAwarePlugin`] runs once in
+//! [`Plugin::finish`] — after `RenderApp` is populated and after
+//! `bevy_settings::PreferencesPlugin` has loaded its files — and:
 //!
 //! 1. detects [`AdapterCaps`] from the live wgpu adapter and inserts the
 //!    resource into the main world;
@@ -97,9 +96,8 @@ impl<T: CapsAware> FromType<T> for ReflectCapsAware {
     }
 }
 
-/// Detects [`AdapterCaps`] in [`Plugin::finish`](bevy_app::Plugin::finish) and
-/// runs the clamp pass over every type registered with
-/// [`ReflectCapsAware`].
+/// Detects [`AdapterCaps`] in [`Plugin::finish`] and runs the clamp pass
+/// over every type registered with [`ReflectCapsAware`].
 ///
 /// Order matters: this plugin must be added *after*
 /// `bevy_render::RenderPlugin` (so `RenderApp` is populated by the time

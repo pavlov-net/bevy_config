@@ -160,8 +160,8 @@ impl CapsAware for RenderSettings {
     }
 }
 
-/// Wires the [`RenderSettings`] axis: registers reflection types and adds the
-/// [`apply_render`] binding system + the camera-add observer.
+/// Wires the [`RenderSettings`] axis: registers reflection types and adds
+/// the binding system + the camera-add observer.
 pub struct RenderSettingsPlugin;
 
 impl Plugin for RenderSettingsPlugin {

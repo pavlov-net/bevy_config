@@ -7,12 +7,12 @@
 //! - **Adapter caps detection** — [`AdapterCaps`](caps::AdapterCaps) is a
 //!   stable, plain-data summary of the live wgpu adapter (backend, vendor,
 //!   ray-query support, DLSS reachability, …). It is detected once during
-//!   [`Plugin::finish`](bevy_app::Plugin::finish) on
-//!   [`CapsAwarePlugin`] and inserted as a main-world resource.
-//! - **Caps clamping** — settings types implement [`CapsAware`] and
-//!   register `#[reflect(CapsAware)]`. [`CapsAwarePlugin`] discovers them by
-//!   reflection and runs each type's `clamp_to(&caps)` after settings have
-//!   been loaded.
+//!   [`Plugin::finish`](bevy_app::Plugin::finish) on [`CapsAwarePlugin`]
+//!   and inserted as a main-world resource.
+//! - **Caps clamping** — settings types implement
+//!   [`CapsAware`](caps_aware::CapsAware) and register `#[reflect(CapsAware)]`.
+//!   [`CapsAwarePlugin`] discovers them by reflection and runs each type's
+//!   `clamp_to(caps)` after settings have been loaded.
 //! - **Opinionated graphics schema** — [`DisplaySettings`](common::DisplaySettings),
 //!   [`RenderSettings`](common::RenderSettings), and [`AccessibilitySettings`](common::AccessibilitySettings)
 //!   resources with platform-aware defaults and the engine bindings that

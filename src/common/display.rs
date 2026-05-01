@@ -133,8 +133,8 @@ impl CapsAware for DisplaySettings {
     }
 }
 
-/// Wires the [`DisplaySettings`] axis: registers reflection types and adds the
-/// [`apply_display`] binding system.
+/// Wires the [`DisplaySettings`] axis: registers reflection types and adds
+/// the primary-window binding system.
 ///
 /// Add this *before* `bevy_settings::PreferencesPlugin` so the type registry
 /// is populated by the time it scans for [`SettingsGroup`] resources.
