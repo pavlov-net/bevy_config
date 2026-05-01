@@ -1,0 +1,45 @@
+[package]
+name = "bevy_config"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "MIT OR Apache-2.0"
+description = "Capability-aware configuration system for Bevy: adapter detection, platform defaults, user overrides, engine bindings."
+repository = "https://github.com/pavlov-net/bevy_config"
+readme = "README.md"
+keywords = ["bevy", "config", "settings", "options", "graphics"]
+categories = ["game-development", "config"]
+
+[features]
+default = ["ron"]
+ron = ["dep:ron"]
+dlss = ["bevy_anti_alias/dlss"]
+
+[package.metadata.docs.rs]
+# DLSS pulls dlss_wgpu which requires the NVIDIA SDK at build time, which
+# docs.rs doesn't have — explicitly skip it. Add other features here if
+# they don't pull external SDKs.
+features = ["ron"]
+
+[dependencies]
+bevy_app = "0.18.1"
+bevy_ecs = "0.18.1"
+bevy_reflect = "0.18.1"
+bevy_render = "0.18.1"
+bevy_window = "0.18.1"
+bevy_anti_alias = "0.18.1"
+bevy_log = "0.18.1"
+serde = { version = "1", features = ["derive"] }
+ron = { version = "0.12", optional = true }
+thiserror = "2"
+wgpu-types = { version = "27", default-features = false }
+
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+directories = "6"
+
+[target.'cfg(target_family = "wasm")'.dependencies]
+web-sys = { version = "0.3", features = ["Window", "Storage"] }
+serde_json = "1"
+
+[dev-dependencies]
+bevy = { version = "0.18.1", default-features = false, features = ["3d"] }
