@@ -4,7 +4,7 @@ Capability-aware configuration system for [Bevy](https://bevy.org).
 
 The shape: **detect adapter caps → pick platform default → layer user overrides → bind to engine resources**.
 
-A single hardcoded set of graphics defaults is wrong on at least one platform. Wasm/WebGPU first-time visitors should get conservative defaults. Desktop with an RT-capable GPU should get the full picture. Adapter features (ray query, acceleration structures, DLSS support) decide whether features are even *available* before user preference comes in.
+A single hardcoded set of graphics defaults is wrong on at least one platform. Wasm/WebGPU first-time visitors should get conservative defaults. Desktop with an RT-capable GPU should get the full picture. Adapter features (ray query, DLSS support, vendor, backend) decide whether features are even *available* before user preference comes in.
 
 `bevy_config` solves this with a small kernel:
 
@@ -19,6 +19,40 @@ A single hardcoded set of graphics defaults is wrong on at least one platform. W
 Audio configuration is intentionally not part of `CommonConfig` because the bus convention is backend-specific (firewheel/seedling/kira/oddio all model differently). When the firewheel/seedling integration lands it will ship as its own `Config` type behind a cargo feature, registered alongside `CommonConfig` via a separate `ConfigPlugin`.
 
 Game-specific quality dials use the same `Config` trait with a custom type and a separate `ConfigPlugin<MyGameConfig>` registration.
+
+## Usage
+
+```rust
+use bevy::prelude::*;
+use bevy_config::prelude::*;
+
+fn main() {
+    App::new()
+        .add_plugins(DefaultPlugins)
+        .add_plugins(ConfigPlugin::<CommonConfig>::new(
+            FileBackend::<CommonConfig>::new("com", "example", "my_game"),
+        ))
+        .add_plugins(CommonBindingsPlugin)
+        .add_systems(Startup, spawn_camera)
+        .run();
+}
+
+fn spawn_camera(mut commands: Commands) {
+    commands.spawn((Camera3d::default(), BevyConfigCamera));
+}
+```
+
+The camera marker tells the binding system which cameras to drive. Spawn it whenever — at `Startup`, on `OnEnter(GameState::Playing)`, after async asset load — the bindings apply on `Add<BevyConfigCamera>` so deferred spawns work without ceremony.
+
+To save a user's settings (e.g., from an "Apply" button in a menu):
+
+```rust
+fn save_button(mut commands: Commands) {
+    commands.queue(SaveConfig::<CommonConfig>::default());
+}
+```
+
+See `examples/basic.rs` for the minimal setup and `examples/deferred_camera.rs` for the post-`Startup` spawn pattern.
 
 ## Status
 

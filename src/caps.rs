@@ -2,7 +2,8 @@
 //!
 //! [`AdapterCaps`] is a stable, plain-data summary of the wgpu adapter — bools, ints,
 //! enums. It is built from `RenderAdapterInfo` + `RenderDevice` once during
-//! [`crate::plugin::ConfigPlugin::finish`] and inserted into the main world as a
+//! [`Plugin::finish`](bevy_app::Plugin::finish) on
+//! [`crate::plugin::ConfigPlugin`] and inserted into the main world as a
 //! resource.
 
 use bevy_app::App;
@@ -32,7 +33,7 @@ pub struct AdapterCaps {
     pub timestamp_query: bool,
     /// DLSS is reachable on this adapter (Vulkan + Nvidia). The `dlss` cargo
     /// feature must also be enabled at build time for the binding to actually
-    /// attach the [`bevy_anti_alias::Dlss`] component.
+    /// attach the `bevy_anti_alias::Dlss` component.
     pub supports_dlss: bool,
 }
 

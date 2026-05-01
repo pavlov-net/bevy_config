@@ -1,4 +1,4 @@
-//! Engine bindings for [`CommonConfig`](crate::common::CommonConfig).
+//! Engine bindings for [`CommonConfig`].
 //!
 //! [`CommonBindingsPlugin`] owns the binding systems for the *graphics* axes
 //! (display + render). They run in `PostUpdate.in_set(BevyConfigSet::ApplyBindings)`,
@@ -30,7 +30,7 @@ pub struct BevyConfigCamera;
 
 /// Wires the graphics binding systems for [`CommonConfig`].
 ///
-/// Add this *after* [`crate::plugin::ConfigPlugin::<CommonConfig>::new(...)`].
+/// Add this *after* [`crate::plugin::ConfigPlugin`] for [`CommonConfig`].
 pub struct CommonBindingsPlugin;
 
 impl Plugin for CommonBindingsPlugin {

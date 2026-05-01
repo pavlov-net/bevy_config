@@ -15,6 +15,12 @@ default = ["ron"]
 ron = ["dep:ron"]
 dlss = ["bevy_anti_alias/dlss"]
 
+[package.metadata.docs.rs]
+# DLSS pulls dlss_wgpu which requires the NVIDIA SDK at build time, which
+# docs.rs doesn't have — explicitly skip it. Add other features here if
+# they don't pull external SDKs.
+features = ["ron"]
+
 [dependencies]
 bevy_app = { git = "https://github.com/bevyengine/bevy" }
 bevy_ecs = { git = "https://github.com/bevyengine/bevy" }

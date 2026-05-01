@@ -36,7 +36,7 @@ pub struct ConfigPlugin<C: Config> {
 impl<C: Config> ConfigPlugin<C> {
     /// Wrap a backend implementation. Most callers will want
     /// [`crate::backend::FileBackend`] (native) or
-    /// [`crate::backend::LocalStorageBackend`] (wasm).
+    /// `LocalStorageBackend` (wasm).
     pub fn new<B: ConfigBackend<C>>(backend: B) -> Self {
         Self {
             backend: Arc::new(backend),

@@ -4,7 +4,7 @@
 //!
 //! - [`FileBackend`] (native) — RON file at `<config_dir>/<app_id>/config.ron`,
 //!   written atomically (tmp + `sync_all` + rename).
-//! - [`LocalStorageBackend`] (wasm) — JSON in `web_sys` localStorage under the
+//! - `LocalStorageBackend` (wasm) — JSON in `web_sys` localStorage under the
 //!   key `<app_id>.bevy_config.<type>`.
 //!
 //! Both implement [`ConfigBackend`]. Consumers can substitute their own
