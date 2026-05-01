@@ -93,6 +93,8 @@ impl<C: Config> Default for SaveConfig<C> {
 }
 
 impl<C: Config> Command for SaveConfig<C> {
+    type Out = ();
+
     fn apply(self, world: &mut World) {
         let target = PlatformTarget::detect();
         let Some(config) = world.get_resource::<C>() else {

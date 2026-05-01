@@ -56,7 +56,7 @@ See `examples/basic.rs` for the minimal setup and `examples/deferred_camera.rs` 
 
 ## Status
 
-`v0.1.x` targets **Bevy 0.18.1**. API may change between minor versions. A `0.19-dev` branch tracks Bevy `main` for the next-release line.
+You're on the `0.19-dev` branch — tracks Bevy `main` (currently `0.19.0-dev`) for the next-release line. The published `v0.1.x` line on `main` targets Bevy 0.18.1; that's what `crates.io` ships and what consumers should pin against until the next minor release. API may change between minor versions on either line.
 
 ## License
 
