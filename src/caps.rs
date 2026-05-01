@@ -3,7 +3,7 @@
 //! [`AdapterCaps`] is a stable, plain-data summary of the wgpu adapter — bools, ints,
 //! enums. It is built from `RenderAdapterInfo` + `RenderDevice` once during
 //! [`Plugin::finish`](bevy_app::Plugin::finish) on
-//! [`crate::plugin::ConfigPlugin`] and inserted into the main world as a
+//! [`crate::caps_aware::CapsAwarePlugin`] and inserted into the main world as a
 //! resource.
 
 use bevy_app::App;
@@ -16,8 +16,8 @@ use bevy_render::renderer::{RenderAdapterInfo, RenderDevice};
 /// Stable summary of the active wgpu adapter, in the main world.
 ///
 /// Construct via [`detect_caps`]; published as a resource by
-/// [`crate::plugin::ConfigPlugin`].
-#[derive(Resource, Reflect, Debug, Clone)]
+/// [`crate::caps_aware::CapsAwarePlugin`].
+#[derive(Resource, Reflect, Debug, Clone, Copy)]
 #[reflect(Resource)]
 pub struct AdapterCaps {
     /// Selected graphics backend (Vulkan, DX12, Metal, …).
@@ -119,16 +119,15 @@ impl PlatformTarget {
 }
 
 /// Read the active adapter from the [`RenderApp`] sub-app and project it onto
-/// [`AdapterCaps`].
+/// [`AdapterCaps`]. Returns `None` for headless / `MinimalPlugins` apps where
+/// no `RenderApp` is present.
 ///
 /// Call from [`bevy_app::Plugin::finish`] — sub-app resources aren't populated
 /// during `build`.
-pub fn detect_caps(app: &mut App) -> AdapterCaps {
-    let render_app = app
-        .get_sub_app(RenderApp)
-        .expect("bevy_config requires the RenderPlugin (RenderApp sub-app missing)");
-    let info = render_app.world().resource::<RenderAdapterInfo>();
-    let device = render_app.world().resource::<RenderDevice>();
+pub fn detect_caps(app: &mut App) -> Option<AdapterCaps> {
+    let render_app = app.get_sub_app(RenderApp)?;
+    let info = render_app.world().get_resource::<RenderAdapterInfo>()?;
+    let device = render_app.world().get_resource::<RenderDevice>()?;
 
     let features = device.features();
     let limits = device.limits();
@@ -136,12 +135,12 @@ pub fn detect_caps(app: &mut App) -> AdapterCaps {
     let backend = Backend::from_wgpu(info.backend);
     let vendor = GpuVendor::from_pci_id(info.vendor);
 
-    AdapterCaps {
+    Some(AdapterCaps {
         backend,
         vendor,
         max_texture_dim_2d: limits.max_texture_dimension_2d,
         ray_query: features.contains(wgpu_types::Features::EXPERIMENTAL_RAY_QUERY),
         timestamp_query: features.contains(wgpu_types::Features::TIMESTAMP_QUERY),
         supports_dlss: matches!((backend, vendor), (Backend::Vulkan, GpuVendor::Nvidia)),
-    }
+    })
 }
