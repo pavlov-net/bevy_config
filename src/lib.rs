@@ -21,10 +21,10 @@ pub mod prelude {
     pub use crate::bindings::{BevyConfigCamera, CommonBindingsPlugin};
     pub use crate::caps::{AdapterCaps, Backend, GpuVendor, PlatformTarget};
     pub use crate::common::{
-        Accessibility, AccessibilityOverrides, AntiAlias, Audio, AudioOverrides, ChannelMode,
-        ColorBlindMode, CommonConfig, CommonConfigOverrides, Display, DisplayOverrides, FpsCap,
-        HdrPreference, MonitorSelection, MsaaLevel, Render, RenderOverrides, Resolution, Upscaler,
-        UpscalerPreset, VsyncMode, WindowMode,
+        Accessibility, AccessibilityOverrides, AntiAlias, ColorBlindMode, CommonConfig,
+        CommonConfigOverrides, Display, DisplayOverrides, FpsCap, HdrPreference, MonitorSelection,
+        MsaaLevel, Render, RenderOverrides, Resolution, Upscaler, UpscalerPreset, VsyncMode,
+        WindowMode,
     };
     pub use crate::config::{BevyConfigSet, Config, ConfigApplied};
     pub use crate::plugin::{ConfigPlugin, SaveConfig};

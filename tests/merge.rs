@@ -52,13 +52,13 @@ fn merge_applies_sparse_overrides() {
     let mut overrides = CommonConfigOverrides::default();
     overrides.render.anti_alias = Some(AntiAlias::Smaa);
     overrides.render.msaa = Some(MsaaLevel::Sample4);
-    overrides.audio.master_db = Some(-6.0);
+    overrides.accessibility.subtitles_on = Some(true);
 
     cfg.merge(&overrides);
 
     assert!(matches!(cfg.render.anti_alias, AntiAlias::Smaa));
     assert!(matches!(cfg.render.msaa, MsaaLevel::Sample4));
-    assert_eq!(cfg.audio.master_db, -6.0);
+    assert!(cfg.accessibility.subtitles_on);
     // Untouched fields keep platform defaults.
     assert!(matches!(cfg.render.upscaler, Upscaler::Native));
 }
@@ -133,14 +133,14 @@ fn current_overrides_captures_only_changes() {
     use bevy_config::config::Config;
     let mut cfg = CommonConfig::platform_default(PlatformTarget::LinuxDesktop);
     cfg.render.msaa = MsaaLevel::Sample4;
-    cfg.audio.music_db = -3.0;
+    cfg.accessibility.subtitles_on = true;
 
     let overrides = cfg.current_overrides(PlatformTarget::LinuxDesktop);
     assert_eq!(overrides.render.msaa, Some(MsaaLevel::Sample4));
-    assert_eq!(overrides.audio.music_db, Some(-3.0));
+    assert_eq!(overrides.accessibility.subtitles_on, Some(true));
     // Untouched fields are None in the diff.
     assert_eq!(overrides.render.anti_alias, None);
-    assert_eq!(overrides.audio.master_db, None);
+    assert_eq!(overrides.accessibility.reduce_motion, None);
 }
 
 #[test]
@@ -149,7 +149,7 @@ fn roundtrip_merge_after_diff() {
     let target = PlatformTarget::LinuxDesktop;
     let mut original = CommonConfig::platform_default(target);
     original.render.msaa = MsaaLevel::Sample8;
-    original.audio.master_db = -12.0;
+    original.accessibility.subtitle_scale = 1.5;
 
     let overrides = original.current_overrides(target);
 

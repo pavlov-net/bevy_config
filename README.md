@@ -14,7 +14,9 @@ A single hardcoded set of graphics defaults is wrong on at least one platform. W
 - `ConfigBackend` trait — load/store; default impls for native RON files (atomic write) and wasm `localStorage`
 - `ConfigPlugin<C>` — wires the lifecycle: load → merge → clamp → apply, on top of `Plugin::build`/`finish`
 
-…plus an opinionated universal schema (`CommonConfig`) covering display, render, audio, and accessibility, and engine bindings for the graphics axes (window mode, anti-alias, MSAA, DLSS — feature-gated).
+…plus an opinionated universal schema (`CommonConfig`) covering display, render, and accessibility, and engine bindings for the graphics axes (window mode, anti-alias, MSAA, DLSS — feature-gated).
+
+Audio configuration is intentionally not part of `CommonConfig` because the bus convention is backend-specific (firewheel/seedling/kira/oddio all model differently). When the firewheel/seedling integration lands it will ship as its own `Config` type behind a cargo feature, registered alongside `CommonConfig` via a separate `ConfigPlugin`.
 
 Game-specific quality dials use the same `Config` trait with a custom type and a separate `ConfigPlugin<MyGameConfig>` registration.
 
