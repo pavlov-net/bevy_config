@@ -56,7 +56,7 @@ See `examples/basic.rs` for the minimal setup and `examples/deferred_camera.rs` 
 
 ## Status
 
-`v0.1.x` — API may change between minor versions. Tracks Bevy `main` until the next Bevy release; will move to versioned deps when that lands.
+`v0.1.x` targets **Bevy 0.18.1**. API may change between minor versions. A `0.19-dev` branch tracks Bevy `main` for the next-release line.
 
 ## License
 
