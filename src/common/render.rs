@@ -62,15 +62,39 @@ pub enum Upscaler {
 }
 
 /// Quality preset for upscalers (DLSS / FSR / XeSS / TSR).
+///
+/// `Auto` and `Dlaa` are DLSS-specific (`Auto` lets DLSS pick the perf tier
+/// based on display resolution; `Dlaa` runs the DLSS network at native res
+/// as a high-quality AA pass). FSR / XeSS / TSR don't have direct
+/// equivalents — selecting either with a non-DLSS upscaler falls back to
+/// the closest perf tier at apply time.
 #[derive(Reflect, Debug, Clone, Copy, PartialEq, Eq, Default)]
 #[reflect(Default)]
 #[non_exhaustive]
 pub enum UpscalerPreset {
+    /// DLSS-only: let the engine pick the perf tier based on display resolution.
+    Auto,
+    /// DLSS-only: run the DLSS network at native resolution as an AA pass.
+    Dlaa,
     #[default]
     Quality,
     Balanced,
     Performance,
     UltraPerformance,
+}
+
+#[cfg(feature = "dlss")]
+impl From<UpscalerPreset> for bevy_anti_alias::dlss::DlssPerfQualityMode {
+    fn from(preset: UpscalerPreset) -> Self {
+        match preset {
+            UpscalerPreset::Auto => Self::Auto,
+            UpscalerPreset::Dlaa => Self::Dlaa,
+            UpscalerPreset::Quality => Self::Quality,
+            UpscalerPreset::Balanced => Self::Balanced,
+            UpscalerPreset::Performance => Self::Performance,
+            UpscalerPreset::UltraPerformance => Self::UltraPerformance,
+        }
+    }
 }
 
 /// Marker component on cameras whose anti-alias / MSAA / upscaler should be
@@ -320,18 +344,12 @@ fn apply_dlss(
         );
         return;
     }
-    use bevy_anti_alias::dlss::{Dlss, DlssPerfQualityMode, DlssSuperResolutionFeature};
+    use bevy_anti_alias::dlss::{Dlss, DlssSuperResolutionFeature};
     use core::marker::PhantomData;
-    let perf_quality_mode = match preset {
-        UpscalerPreset::Quality => DlssPerfQualityMode::Quality,
-        UpscalerPreset::Balanced => DlssPerfQualityMode::Balanced,
-        UpscalerPreset::Performance => DlssPerfQualityMode::Performance,
-        UpscalerPreset::UltraPerformance => DlssPerfQualityMode::UltraPerformance,
-    };
     commands
         .entity(entity)
         .insert(Dlss::<DlssSuperResolutionFeature> {
-            perf_quality_mode,
+            perf_quality_mode: preset.into(),
             reset: false,
             _phantom_data: PhantomData,
         });
