@@ -34,6 +34,7 @@
 //! own `Plugin::build`) and add [`CapsAwarePlugin`] once.
 
 use bevy_app::{App, Plugin};
+use bevy_ecs::component::Mutable;
 use bevy_ecs::reflect::AppTypeRegistry;
 use bevy_ecs::reflect::ReflectResource;
 use bevy_ecs::resource::Resource;
@@ -52,7 +53,9 @@ use crate::caps::{AdapterCaps, detect_caps};
 /// `bevy_settings::SavePreferencesDeferred` would re-write the file with
 /// the clamped values, silently overwriting the user's stored intent on
 /// hardware that doesn't support all features.
-pub trait CapsAware: Resource + Reflect + FromReflect + TypePath + Clone + PartialEq {
+pub trait CapsAware:
+    Resource<Mutability = Mutable> + Reflect + FromReflect + TypePath + Clone + PartialEq
+{
     /// Mutate `self` to fit `caps`. Called once after settings are loaded
     /// from disk and the wgpu adapter has been queried.
     fn clamp_to(&mut self, caps: AdapterCaps);
