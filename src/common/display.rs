@@ -1,22 +1,43 @@
-//! `Display` axis: window mode, monitor, resolution, vsync, fps cap, HDR.
+//! `DisplaySettings` axis: window mode, monitor, resolution, vsync, fps cap, HDR.
+//!
+//! Ships the [`DisplaySettings`] resource (a `bevy_settings::SettingsGroup`), leaf
+//! enums (`WindowMode`, `VsyncMode`, `MonitorSelection`, `Resolution`,
+//! `FpsCap`, `HdrPreference`), and [`DisplaySettingsPlugin`] which adds
+//! the primary-window binding system.
 
+use bevy_app::{App, Plugin, PostUpdate};
+use bevy_ecs::prelude::*;
+use bevy_ecs::reflect::ReflectResource;
+use bevy_ecs::resource::Resource;
 use bevy_reflect::Reflect;
-use serde::{Deserialize, Serialize};
+use bevy_reflect::prelude::ReflectDefault;
+use bevy_settings::{ReflectSettingsGroup, SettingsGroup};
+use bevy_window::{
+    MonitorSelection as BevyMonitorSelection, PresentMode, PrimaryWindow, VideoModeSelection,
+    Window, WindowMode as BevyWindowMode,
+};
 
+use crate::ApplyBindings;
 use crate::caps::{AdapterCaps, PlatformTarget};
+use crate::caps_aware::{CapsAware, ReflectCapsAware};
 
 /// Window presentation mode.
-#[derive(Reflect, Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Reflect, Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[reflect(Default)]
 pub enum WindowMode {
+    #[default]
     Windowed,
     BorderlessFullscreen,
     Fullscreen,
 }
 
 /// Vsync intent. The binding maps these onto [`bevy_window::PresentMode`].
-#[derive(Reflect, Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Reflect, Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[reflect(Default)]
+#[non_exhaustive]
 pub enum VsyncMode {
     /// Driver-default vsync (maps to `AutoVsync`).
+    #[default]
     Auto,
     /// Force vsync on (maps to `Fifo`).
     On,
@@ -27,38 +48,53 @@ pub enum VsyncMode {
 }
 
 /// Monitor selection. The binding maps onto [`bevy_window::MonitorSelection`].
-#[derive(Reflect, Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Reflect, Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[reflect(Default)]
 #[non_exhaustive]
 pub enum MonitorSelection {
+    #[default]
     Primary,
     Index(u32),
 }
 
 /// Resolution choice. `Native` defers to the monitor's preferred mode.
-#[derive(Reflect, Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Reflect, Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[reflect(Default)]
 pub enum Resolution {
+    #[default]
     Native,
-    Custom { width: u32, height: u32 },
+    Custom {
+        width: u32,
+        height: u32,
+    },
 }
 
 /// Frame-rate cap. `Unlimited` disables capping.
-#[derive(Reflect, Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Reflect, Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[reflect(Default)]
 pub enum FpsCap {
+    #[default]
     Unlimited,
     Capped(u32),
 }
 
 /// HDR display preference (slot — auto-detect on Windows DXGI is deferred).
-#[derive(Reflect, Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Reflect, Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[reflect(Default)]
 pub enum HdrPreference {
+    #[default]
     Off,
     On,
     Auto,
 }
 
-/// Populated display config.
-#[derive(Reflect, Debug, Clone, PartialEq, Eq)]
-pub struct Display {
+/// DisplaySettings config resource. Discovered by `bevy_settings::PreferencesPlugin`
+/// via [`SettingsGroup`] and clamped to caps by
+/// [`crate::CapsAwarePlugin`].
+#[derive(Resource, SettingsGroup, Reflect, Debug, Clone, PartialEq, Eq)]
+#[reflect(Resource, SettingsGroup, CapsAware, Default)]
+#[settings_group(group = "display")]
+pub struct DisplaySettings {
     pub window_mode: WindowMode,
     pub monitor: MonitorSelection,
     pub resolution: Resolution,
@@ -68,28 +104,11 @@ pub struct Display {
     pub hdr: HdrPreference,
 }
 
-/// Sparse on-disk overrides for [`Display`].
-#[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-#[serde(default)]
-pub struct DisplayOverrides {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub window_mode: Option<WindowMode>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub monitor: Option<MonitorSelection>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub resolution: Option<Resolution>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub refresh_rate: Option<Option<u32>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub vsync: Option<VsyncMode>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub fps_cap: Option<FpsCap>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub hdr: Option<HdrPreference>,
-}
-
-impl Display {
-    pub(crate) fn platform_default(_target: PlatformTarget) -> Self {
+impl DisplaySettings {
+    /// Conservative, platform-appropriate defaults. Used by the `Default`
+    /// impl (which is what `bevy_settings` constructs from when no value is
+    /// loaded from disk).
+    pub fn platform_default(_target: PlatformTarget) -> Self {
         Self {
             window_mode: WindowMode::Windowed,
             monitor: MonitorSelection::Primary,
@@ -100,44 +119,74 @@ impl Display {
             hdr: HdrPreference::Off,
         }
     }
+}
 
-    pub(crate) fn merge(&mut self, o: &DisplayOverrides) {
-        if let Some(v) = o.window_mode {
-            self.window_mode = v;
+impl Default for DisplaySettings {
+    fn default() -> Self {
+        Self::platform_default(PlatformTarget::detect())
+    }
+}
+
+impl CapsAware for DisplaySettings {
+    fn clamp_to(&mut self, _caps: AdapterCaps) {
+        // No display-axis caps clamping today.
+    }
+}
+
+/// Wires the [`DisplaySettings`] axis: registers reflection types and adds
+/// the primary-window binding system.
+///
+/// Add this *before* `bevy_settings::PreferencesPlugin` so the type registry
+/// is populated by the time it scans for [`SettingsGroup`] resources.
+/// [`crate::SettingsPlusPlugins`] handles ordering for you.
+pub struct DisplaySettingsPlugin;
+
+impl Plugin for DisplaySettingsPlugin {
+    fn build(&self, app: &mut App) {
+        app.register_type::<DisplaySettings>();
+        app.add_systems(
+            PostUpdate,
+            apply_display
+                .in_set(ApplyBindings)
+                .run_if(resource_changed::<DisplaySettings>),
+        );
+    }
+}
+
+pub(crate) fn apply_display(
+    display: Res<DisplaySettings>,
+    mut window: Single<&mut Window, With<PrimaryWindow>>,
+) {
+    let bevy_monitor = match display.monitor {
+        MonitorSelection::Primary => BevyMonitorSelection::Primary,
+        MonitorSelection::Index(i) => BevyMonitorSelection::Index(i as usize),
+    };
+
+    let target_mode = match display.window_mode {
+        WindowMode::Windowed => BevyWindowMode::Windowed,
+        WindowMode::BorderlessFullscreen => BevyWindowMode::BorderlessFullscreen(bevy_monitor),
+        WindowMode::Fullscreen => {
+            BevyWindowMode::Fullscreen(bevy_monitor, VideoModeSelection::Current)
         }
-        if let Some(v) = o.monitor {
-            self.monitor = v;
-        }
-        if let Some(v) = o.resolution {
-            self.resolution = v;
-        }
-        if let Some(v) = o.refresh_rate {
-            self.refresh_rate = v;
-        }
-        if let Some(v) = o.vsync {
-            self.vsync = v;
-        }
-        if let Some(v) = o.fps_cap {
-            self.fps_cap = v;
-        }
-        if let Some(v) = o.hdr {
-            self.hdr = v;
-        }
+    };
+    if window.mode != target_mode {
+        window.mode = target_mode;
     }
 
-    pub(crate) fn clamp_to(&mut self, _caps: &AdapterCaps) {
-        // No display-axis caps clamping in v0.1.
+    let target_present = match display.vsync {
+        VsyncMode::Auto => PresentMode::AutoVsync,
+        VsyncMode::On => PresentMode::Fifo,
+        VsyncMode::Off => PresentMode::Immediate,
+        VsyncMode::Mailbox => PresentMode::Mailbox,
+    };
+    if window.present_mode != target_present {
+        window.present_mode = target_present;
     }
 
-    pub(crate) fn diff(&self, default: &Self) -> DisplayOverrides {
-        DisplayOverrides {
-            window_mode: (self.window_mode != default.window_mode).then_some(self.window_mode),
-            monitor: (self.monitor != default.monitor).then_some(self.monitor),
-            resolution: (self.resolution != default.resolution).then_some(self.resolution),
-            refresh_rate: (self.refresh_rate != default.refresh_rate).then_some(self.refresh_rate),
-            vsync: (self.vsync != default.vsync).then_some(self.vsync),
-            fps_cap: (self.fps_cap != default.fps_cap).then_some(self.fps_cap),
-            hdr: (self.hdr != default.hdr).then_some(self.hdr),
-        }
+    if let Resolution::Custom { width, height } = display.resolution
+        && (window.resolution.physical_width() != width
+            || window.resolution.physical_height() != height)
+    {
+        window.resolution.set_physical_resolution(width, height);
     }
 }

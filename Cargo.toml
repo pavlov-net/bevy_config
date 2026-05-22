@@ -1,45 +1,37 @@
 [package]
-name = "bevy_config"
+name = "bevy_settings_plus"
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.85"
 license = "MIT OR Apache-2.0"
-description = "Capability-aware configuration system for Bevy: adapter detection, platform defaults, user overrides, engine bindings."
-repository = "https://github.com/pavlov-net/bevy_config"
+description = "Capability-aware extension to bevy_settings: adapter detection, platform defaults, caps clamping, engine bindings."
+repository = "https://github.com/pavlov-net/bevy_settings_plus"
 readme = "README.md"
-keywords = ["bevy", "config", "settings", "options", "graphics"]
+keywords = ["bevy", "settings", "config", "graphics"]
 categories = ["game-development", "config"]
 
 [features]
-default = ["ron"]
-ron = ["dep:ron"]
+default = []
 dlss = ["bevy_anti_alias/dlss"]
 
 [package.metadata.docs.rs]
 # DLSS pulls dlss_wgpu which requires the NVIDIA SDK at build time, which
 # docs.rs doesn't have — explicitly skip it. Add other features here if
 # they don't pull external SDKs.
-features = ["ron"]
+features = []
 
 [dependencies]
-bevy_app = "0.18.1"
-bevy_ecs = "0.18.1"
-bevy_reflect = "0.18.1"
-bevy_render = "0.18.1"
-bevy_window = "0.18.1"
-bevy_anti_alias = "0.18.1"
-bevy_log = "0.18.1"
-serde = { version = "1", features = ["derive"] }
-ron = { version = "0.12", optional = true }
-thiserror = "2"
-wgpu-types = { version = "27", default-features = false }
-
-[target.'cfg(not(target_family = "wasm"))'.dependencies]
-directories = "6"
-
-[target.'cfg(target_family = "wasm")'.dependencies]
-web-sys = { version = "0.3", features = ["Window", "Storage"] }
-serde_json = "1"
+bevy_app = { git = "https://github.com/bevyengine/bevy" }
+bevy_ecs = { git = "https://github.com/bevyengine/bevy" }
+bevy_reflect = { git = "https://github.com/bevyengine/bevy" }
+bevy_render = { git = "https://github.com/bevyengine/bevy" }
+bevy_window = { git = "https://github.com/bevyengine/bevy" }
+bevy_anti_alias = { git = "https://github.com/bevyengine/bevy" }
+bevy_log = { git = "https://github.com/bevyengine/bevy" }
+# Upstream renamed the package to `bevy-settings` (matches its crates.io name);
+# the Rust import name stays `bevy_settings`.
+bevy-settings = { git = "https://github.com/bevyengine/bevy" }
+wgpu-types = { version = "29", default-features = false }
 
 [dev-dependencies]
-bevy = { version = "0.18.1", default-features = false, features = ["3d"] }
+bevy = { git = "https://github.com/bevyengine/bevy", default-features = false, features = ["3d"] }
