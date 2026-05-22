@@ -40,7 +40,7 @@ use bevy_ecs::reflect::ReflectResource;
 use bevy_ecs::resource::Resource;
 use bevy_ecs::world::World;
 use bevy_log::warn;
-use bevy_reflect::{FromReflect, FromType, Reflect, TypePath, TypeRegistration};
+use bevy_reflect::{CreateTypeData, FromReflect, Reflect, TypePath, TypeRegistration};
 
 use crate::caps::{AdapterCaps, detect_caps};
 
@@ -68,8 +68,8 @@ pub struct ReflectCapsAware {
     clamp_in_world: fn(&mut World, AdapterCaps),
 }
 
-impl<T: CapsAware> FromType<T> for ReflectCapsAware {
-    fn from_type() -> Self {
+impl<T: CapsAware> CreateTypeData<T> for ReflectCapsAware {
+    fn create_type_data(_input: ()) -> Self {
         Self {
             clamp_in_world: |world, caps| {
                 let candidate: T = match world.get_resource::<T>() {
