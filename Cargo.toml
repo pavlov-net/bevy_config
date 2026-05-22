@@ -28,7 +28,9 @@ bevy_render = { git = "https://github.com/bevyengine/bevy" }
 bevy_window = { git = "https://github.com/bevyengine/bevy" }
 bevy_anti_alias = { git = "https://github.com/bevyengine/bevy" }
 bevy_log = { git = "https://github.com/bevyengine/bevy" }
-bevy_settings = { git = "https://github.com/bevyengine/bevy" }
+# Upstream renamed the package to `bevy-settings` (matches its crates.io name);
+# the Rust import name stays `bevy_settings`.
+bevy-settings = { git = "https://github.com/bevyengine/bevy" }
 wgpu-types = { version = "29", default-features = false }
 
 [dev-dependencies]
