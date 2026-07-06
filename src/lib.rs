@@ -40,7 +40,7 @@
 //! use bevy_settings_plus::prelude::*;
 //!
 //! fn save_button(mut commands: Commands) {
-//!     commands.queue(SavePreferencesDeferred::default());
+//!     commands.queue(SaveSettingsDeferred::default());
 //! }
 //! ```
 //!
@@ -56,7 +56,7 @@ pub mod common;
 
 use bevy_app::{PluginGroup, PluginGroupBuilder};
 use bevy_ecs::schedule::SystemSet;
-use bevy_settings::PreferencesPlugin;
+use bevy_settings::SettingsPlugin;
 
 use crate::caps_aware::CapsAwarePlugin;
 use crate::common::{AccessibilitySettingsPlugin, DisplaySettingsPlugin, RenderSettingsPlugin};
@@ -74,7 +74,7 @@ pub struct ApplyBindings;
 /// 1. [`DisplaySettingsPlugin`] / [`RenderSettingsPlugin`] /
 ///    [`AccessibilitySettingsPlugin`] — register reflection types and
 ///    binding systems before `bevy_settings` scans the registry.
-/// 2. [`bevy_settings::PreferencesPlugin`] — discover registered
+/// 2. [`bevy_settings::SettingsPlugin`] — discover registered
 ///    [`SettingsGroup`](bevy_settings::SettingsGroup) resources and load
 ///    their values from the on-disk TOML.
 /// 3. [`CapsAwarePlugin`] — runs in `finish()`: detects [`AdapterCaps`](caps::AdapterCaps)
@@ -105,7 +105,7 @@ pub struct SettingsPlusPlugins {
 impl SettingsPlusPlugins {
     /// Wires the group with the given reverse-domain application id (e.g.
     /// `"net.pavlov.my_game"`). Passed through to
-    /// [`PreferencesPlugin::new`] for on-disk path derivation.
+    /// [`SettingsPlugin::new`] for on-disk path derivation.
     pub fn new(app_name: impl Into<String>) -> Self {
         Self {
             app_name: app_name.into(),
@@ -121,7 +121,7 @@ impl PluginGroup for SettingsPlusPlugins {
             .add(RenderSettingsPlugin)
             .add(AccessibilitySettingsPlugin)
             // Then the upstream loader, which scans the registry.
-            .add(PreferencesPlugin::new(&self.app_name))
+            .add(SettingsPlugin::new(&self.app_name))
             // Finally, caps detection + the reflection-driven clamp pass.
             .add(CapsAwarePlugin)
     }
@@ -143,7 +143,7 @@ pub mod prelude {
     // Re-export the most commonly used `bevy_settings` surface so callers
     // only need `bevy_settings_plus::prelude::*`.
     pub use bevy_settings::{
-        PreferencesPlugin, SavePreferences, SavePreferencesDeferred, SavePreferencesSync,
+        SettingsPlugin, SaveSettings, SaveSettingsDeferred, SaveSettingsSync,
         SettingsGroup,
     };
 }

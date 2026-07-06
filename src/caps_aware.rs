@@ -3,7 +3,7 @@
 //! [`CapsAware`] is a small trait that any settings [`Resource`] can implement
 //! to declare a `clamp_to(caps)` step. [`CapsAwarePlugin`] runs once in
 //! [`Plugin::finish`] — after `RenderApp` is populated and after
-//! `bevy_settings::PreferencesPlugin` has loaded its files — and:
+//! `bevy_settings::SettingsPlugin` has loaded its files — and:
 //!
 //! 1. detects [`AdapterCaps`] from the live wgpu adapter and inserts the
 //!    resource into the main world;
@@ -50,7 +50,7 @@ use crate::caps::{AdapterCaps, detect_caps};
 ///
 /// `Clone + PartialEq` are required so the clamp pass can avoid bumping the
 /// resource's change tick when clamping is a no-op — otherwise the next
-/// `bevy_settings::SavePreferencesDeferred` would re-write the file with
+/// `bevy_settings::SaveSettingsDeferred` would re-write the file with
 /// the clamped values, silently overwriting the user's stored intent on
 /// hardware that doesn't support all features.
 pub trait CapsAware:
@@ -104,7 +104,7 @@ impl<T: CapsAware> CreateTypeData<T> for ReflectCapsAware {
 ///
 /// Order matters: this plugin must be added *after*
 /// `bevy_render::RenderPlugin` (so `RenderApp` is populated by the time
-/// `finish` runs) and *after* `bevy_settings::PreferencesPlugin` (so
+/// `finish` runs) and *after* `bevy_settings::SettingsPlugin` (so
 /// settings have been loaded from disk before clamping). The convenience
 /// [`crate::SettingsPlusPlugins`] group wires the order correctly.
 ///

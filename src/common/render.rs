@@ -117,7 +117,7 @@ impl From<UpscalerPreset> for bevy_anti_alias::dlss::DlssPerfQualityMode {
 #[derive(Component, Debug, Clone, Copy, Default)]
 pub struct SettingsCamera;
 
-/// RenderSettings config resource. Discovered by `bevy_settings::PreferencesPlugin`
+/// RenderSettings config resource. Discovered by `bevy_settings::SettingsPlugin`
 /// via [`SettingsGroup`] and clamped to caps by
 /// [`crate::CapsAwarePlugin`].
 #[derive(Resource, SettingsGroup, Reflect, Debug, Clone, PartialEq)]
@@ -250,7 +250,7 @@ pub(crate) fn apply_render(
 // `resource_changed::<RenderSettings>` pulse still get their settings on frame 0.
 //
 // `RenderSettings` is `Option`al because the observer can fire before
-// `PreferencesPlugin::build` inserts the resource (e.g., a user plugin's
+// `SettingsPlugin::build` inserts the resource (e.g., a user plugin's
 // `build` synchronously spawns a `SettingsCamera` between when this
 // observer is registered and when the resource is loaded).
 pub(crate) fn apply_render_on_camera_add(

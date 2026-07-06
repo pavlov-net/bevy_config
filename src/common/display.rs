@@ -88,7 +88,7 @@ pub enum HdrPreference {
     Auto,
 }
 
-/// DisplaySettings config resource. Discovered by `bevy_settings::PreferencesPlugin`
+/// DisplaySettings config resource. Discovered by `bevy_settings::SettingsPlugin`
 /// via [`SettingsGroup`] and clamped to caps by
 /// [`crate::CapsAwarePlugin`].
 #[derive(Resource, SettingsGroup, Reflect, Debug, Clone, PartialEq, Eq)]
@@ -136,7 +136,7 @@ impl CapsAware for DisplaySettings {
 /// Wires the [`DisplaySettings`] axis: registers reflection types and adds
 /// the primary-window binding system.
 ///
-/// Add this *before* `bevy_settings::PreferencesPlugin` so the type registry
+/// Add this *before* `bevy_settings::SettingsPlugin` so the type registry
 /// is populated by the time it scans for [`SettingsGroup`] resources.
 /// [`crate::SettingsPlusPlugins`] handles ordering for you.
 pub struct DisplaySettingsPlugin;
